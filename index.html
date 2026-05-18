@@ -1,0 +1,631 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="initial-scale=1,user-scalable=no,maximum-scale=1,width=device-width">
+        <meta name="mobile-web-app-capable" content="yes">
+        <meta name="apple-mobile-web-app-capable" content="yes">
+        
+        <link rel="stylesheet" href="css/leaflet.css">
+        <link rel="stylesheet" href="css/L.Control.Layers.Tree.css">
+        <link rel="stylesheet" href="css/qgis2web.css">
+        <link rel="stylesheet" href="css/fontawesome-all.min.css">
+        <link rel="stylesheet" href="css/leaflet.photon.css">
+
+        <style>
+            /* Reset & Core Dark Theme Layout */
+            html, body {
+                width: 100%;
+                height: 100%;
+                padding: 0;
+                margin: 0;
+                font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+                background-color: #030a16;
+                color: #e2e8f0;
+                overflow: hidden;
+            }
+
+            .app-container {
+                display: flex;
+                width: 100vw;
+                height: 100vh;
+            }
+
+            /* Dark Cyber-Theme Sidebar Layout */
+            .sidebar {
+                width: 380px;
+                min-width: 380px;
+                background: #061023;
+                border-right: 1px solid #142847;
+                display: flex;
+                flex-direction: column;
+                z-index: 1010;
+                box-shadow: 5px 0 25px rgba(0,0,0,0.5);
+            }
+
+            /* Header Section */
+            .sidebar-header {
+                background: linear-gradient(180deg, #0b1a33 0%, #061023 100%);
+                padding: 20px;
+                display: flex;
+                align-items: center;
+                gap: 15px;
+                border-bottom: 1px solid #142847;
+            }
+
+            .header-icon {
+                background: #0070f3;
+                color: #fff;
+                width: 42px;
+                height: 42px;
+                border-radius: 10px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 20px;
+                box-shadow: 0 0 15px rgba(0, 112, 243, 0.4);
+            }
+
+            .sidebar-header h1 {
+                font-size: 16px;
+                margin: 0;
+                font-weight: 700;
+                color: #ffffff;
+                letter-spacing: 0.5px;
+            }
+
+            .sidebar-header h1 span {
+                color: #38bdf8;
+            }
+
+            /* Content Containers */
+            .sidebar-content {
+                flex: 1;
+                overflow-y: auto;
+                padding: 20px;
+            }
+
+            .panel-card {
+                background: #0a162d;
+                border: 1px solid #142847;
+                border-radius: 12px;
+                padding: 16px;
+                margin-bottom: 20px;
+            }
+
+            .panel-title {
+                font-size: 12px;
+                text-transform: uppercase;
+                letter-spacing: 1px;
+                color: #64748b;
+                font-weight: 700;
+                margin-bottom: 15px;
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                border-bottom: 1px solid #142847;
+                padding-bottom: 8px;
+            }
+
+            .panel-title-icon {
+                width: 8px;
+                height: 8px;
+                background: #38bdf8;
+                border-radius: 2px;
+                display: inline-block;
+            }
+
+            /* Project Info Parameters Table */
+            .info-table {
+                width: 100%;
+                border-collapse: collapse;
+            }
+
+            .info-table td {
+                padding: 6px 0;
+                vertical-align: top;
+                font-size: 13px;
+            }
+
+            .info-label {
+                color: #64748b;
+                width: 90px;
+                font-weight: 600;
+            }
+
+            .info-value {
+                color: #cbd5e1;
+            }
+
+            /* Technical Content Coverage Tags */
+            .tags-container {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 6px;
+                margin-top: 8px;
+            }
+
+            .tag {
+                background: #0f2447;
+                border: 1px solid #1e3a66;
+                color: #38bdf8;
+                font-size: 11px;
+                padding: 4px 8px;
+                border-radius: 6px;
+                font-weight: 500;
+            }
+
+            /* Dynamic Layer Button Elements */
+            .basemap-toggle-group {
+                display: flex;
+                gap: 10px;
+            }
+
+            .layer-btn {
+                flex: 1;
+                background: #0f2447;
+                border: 1px solid #1e3a66;
+                color: #94a3b8;
+                padding: 10px;
+                border-radius: 8px;
+                cursor: pointer;
+                font-size: 12px;
+                font-weight: 600;
+                text-align: center;
+                transition: all 0.2s ease;
+            }
+
+            .layer-btn:hover {
+                background: #173564;
+                color: #fff;
+            }
+
+            .layer-btn.active {
+                background: #0070f3;
+                border-color: #0070f3;
+                color: #ffffff;
+                box-shadow: 0 0 12px rgba(0, 112, 243, 0.4);
+            }
+
+            /* Dynamic Map Control Legend Rows */
+            .legend-list {
+                display: flex;
+                flex-direction: column;
+                gap: 4px;
+            }
+
+            .legend-item {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                padding: 10px 12px;
+                background: #0f2447;
+                border: 1px solid #1e3a66;
+                border-radius: 8px;
+                cursor: pointer;
+                transition: all 0.2s ease;
+            }
+
+            .legend-item:hover {
+                background: #173564;
+                border-color: #254e8c;
+            }
+
+            .legend-item.active {
+                background: #112952;
+                border-color: #38bdf8;
+            }
+
+            .legend-left {
+                display: flex;
+                align-items: center;
+                gap: 12px;
+            }
+
+            .legend-label {
+                font-size: 13px;
+                font-weight: 500;
+                color: #cbd5e1;
+            }
+
+            /* Indicator Geometric Symbols */
+            .symbol {
+                width: 14px;
+                height: 14px;
+                display: inline-block;
+                flex-shrink: 0;
+            }
+
+            .symbol-point {
+                border-radius: 50%;
+                background: #e10019;
+                border: 2px solid #fff;
+                box-shadow: 0 0 6px #e10019;
+            }
+
+            .symbol-line {
+                height: 4px;
+                border-radius: 2px;
+            }
+
+            .indicator-dot {
+                width: 8px;
+                height: 8px;
+                border-radius: 50%;
+                background: #475569;
+                transition: all 0.2s ease;
+            }
+
+            .legend-item.active .indicator-dot {
+                background: #10b981;
+                box-shadow: 0 0 8px #10b981;
+            }
+
+            /* App Map Block Canvas Window Wrapper */
+            .map-container {
+                flex: 1;
+                position: relative;
+                height: 100%;
+            }
+
+            #map {
+                width: 100%;
+                height: 100%;
+                background-color: #030a16;
+            }
+
+            .sidebar-footer {
+                padding: 15px 20px;
+                background: #0b1a33;
+                border-top: 1px solid #142847;
+                font-size: 11px;
+                color: #64748b;
+                text-align: center;
+                line-height: 1.4;
+            }
+        </style>
+        <title>GeoTrack: On-the-Job Field Survey Dashboard</title>
+    </head>
+    <body>
+        
+        <div class="app-container">
+            <div class="sidebar">
+                <div class="sidebar-header">
+                    <div class="header-icon"><i class="fas fa-globe"></i></div>
+                    <div>
+                        <h1>GeoTrack: <span>On-the-Job Field Survey</span> Dashboard</h1>
+                    </div>
+                </div>
+
+                <div class="sidebar-content">
+                    <div class="panel-card">
+                        <div class="panel-title"><span class="panel-title-icon"></span> Student Profile & Credentials</div>
+                        <table class="info-table">
+                            <tr><td class="info-label">NAME</td><td class="info-value">Onkar Kishor Pandhare</td></tr>
+                            <tr><td class="info-label">PROGRAM</td><td class="info-value">MSc Geoinformatics</td></tr>
+                            <tr><td class="info-label">DEPARTMENT</td><td class="info-value">School of Earth Sciences</td></tr>
+                            <tr><td class="info-label">UNIVERSITY</td><td class="info-value">Punyashlok Ahilyadevi Holkar Solapur University, Solapur</td></tr>
+                            <tr><td class="info-label">OJT Agency</td><td class="info-value">Pruthvi Consultant Surveying Agency, Sangli</td></tr>
+                             <tr><td class="info-label">PROJECT</td><td class="info-value">Geospatial Dashboard for Field Work Verification & Asset Mapping: Sangli - Solapur Region</td></tr>
+                                <td class="info-label">COVERAGE</td>
+                                <td class="info-value">
+                                    <div class="tags-container">
+                                        <span class="tag">GPS Points & Images</span>
+                                        <span class="tag">Village Boundaries</span>
+                                        <span class="tag">Taluka Boundaries</span>
+                                        <span class="tag">District Boundaries</span>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr><td class="info-label">Training Period:</td><td class="info-value" style="color: #64748b;"> 27 April 2026 to 11 May 2026</td></tr>
+                        </table>
+                    </div>
+
+                    <div class="panel-card">
+                        <div class="panel-title"><span class="panel-title-icon"></span>Layers</div>
+                        <div class="basemap-toggle-group">
+                            <button class="layer-btn" id="btn-satellite" onclick="switchBasemap('satellite')">Google Satellite</button>
+                            <button class="layer-btn active" id="btn-osm" onclick="switchBasemap('osm')">OpenStreetMap</button>
+                        </div>
+                    </div>
+
+                    <div class="panel-card">
+                        <div class="panel-title"><span class="panel-title-icon"></span>Legend Layer Toggles</div>
+                        <div class="legend-list">
+                            
+                            <div class="legend-item active" onclick="toggleMapLayer('gps_points', this)">
+                                <div class="legend-left">
+                                    <span class="symbol symbol-point"></span>
+                                    <span class="legend-label">GPS Survey Points</span>
+                                </div>
+                                <div class="indicator-dot"></div>
+                            </div>
+
+                            <div class="legend-item active" onclick="toggleMapLayer('sangli_district', this)">
+                                <div class="legend-left">
+                                    <span class="symbol symbol-line" style="background: rgba(255,127,0,1.0); border-top: 2px dashed #fff;"></span>
+                                    <span class="legend-label">District Boundary (Sangli)</span>
+                                </div>
+                                <div class="indicator-dot"></div>
+                            </div>
+
+                            <div class="legend-item active" onclick="toggleMapLayer('solapur_district', this)">
+                                <div class="legend-left">
+                                    <span class="symbol symbol-line" style="background: rgba(255,127,0,1.0);"></span>
+                                    <span class="legend-label">District Boundary (Solapur)</span>
+                                </div>
+                                <div class="indicator-dot"></div>
+                            </div>
+
+                            <div class="legend-item active" onclick="toggleMapLayer('sangli_taluka', this)">
+                                <div class="legend-left">
+                                    <span class="symbol symbol-line" style="background: rgba(77,175,74,1.0);"></span>
+                                    <span class="legend-label">Taluka Boundary (Sangli)</span>
+                                </div>
+                                <div class="indicator-dot"></div>
+                            </div>
+
+                            <div class="legend-item active" onclick="toggleMapLayer('solapur_taluka', this)">
+                                <div class="legend-left">
+                                    <span class="symbol symbol-line" style="background: rgba(53,121,177,1.0);"></span>
+                                    <span class="legend-label">Taluka Boundary (Solapur)</span>
+                                </div>
+                                <div class="indicator-dot"></div>
+                            </div>
+
+                            <div class="legend-item active" onclick="toggleMapLayer('sangli_village', this)">
+                                <div class="legend-left">
+                                    <span class="symbol symbol-line" style="background: rgba(121,14,3,1.0);"></span>
+                                    <span class="legend-label">Village Boundary (Sangli)</span>
+                                </div>
+                                <div class="indicator-dot"></div>
+                            </div>
+
+                            <div class="legend-item active" onclick="toggleMapLayer('solapur_village', this)">
+                                <div class="legend-left">
+                                    <span class="symbol symbol-line" style="background: rgba(121,14,3,1.0); opacity: 0.6;"></span>
+                                    <span class="legend-label">Village Boundary (Solapur)</span>
+                                </div>
+                                <div class="indicator-dot"></div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+
+                <div class="sidebar-footer">
+                    Designed & Developed by: Onkar Kishor Pandhare<br>
+                    M.Sc. Geoinformatics &copy; 2026
+                </div>
+            </div>
+
+            <div class="map-container">
+                <div id="map"></div>
+            </div>
+        </div>
+
+        <script src="js/qgis2web_expressions.js"></script>
+        <script src="js/leaflet.js"></script>
+        <script src="js/L.Control.Layers.Tree.min.js"></script>
+        <script src="js/leaflet.rotatedMarker.js"></script>
+        <script src="js/leaflet.pattern.js"></script>
+        <script src="js/leaflet-hash.js"></script>
+        <script src="js/Autolinker.min.js"></script>
+        <script src="js/rbush.min.js"></script>
+        <script src="js/labelgun.min.js"></script>
+        <script src="js/labels.js"></script>
+        <script src="js/leaflet.photon.js"></script>
+        
+        <script src="data/Sangali_village_boundary_2.js"></script>
+        <script src="data/Solapur_village_boundary_3.js"></script>
+        <script src="data/Sangli_taluka_boundary_4.js"></script>
+        <script src="data/Solapur_taluka_boundary_5.js"></script>
+        <script src="data/Sangali_district_boundari_6.js"></script>
+        <script src="data/Solapur_district_boundari_7.js"></script>
+        <script src="data/gps_points_8.js"></script>
+
+        <script>
+        // Initialize Map Instance
+        var map = L.map('map', {
+            zoomControl:false, maxZoom:28, minZoom:1
+        }).fitBounds([[16.974818981021276,74.51541717683808],[17.457599199536457,75.45625926668048]]);
+        
+        var hash = new L.Hash(map);
+        var autolinker = new Autolinker({truncate: {length: 30, location: 'smart'}});
+        
+        function removeEmptyRowsFromPopupContent(content, feature) {
+             var tempDiv = document.createElement('div');
+             tempDiv.innerHTML = content;
+             var rows = tempDiv.querySelectorAll('tr');
+             for (var i = 0; i < rows.length; i++) {
+                 var td = rows[i].querySelector('td.visible-with-data');
+                 var key = td ? td.id : '';
+                 if (td && td.classList.contains('visible-with-data') && feature.properties[key] == null) {
+                     rows[i].parentNode.removeChild(rows[i]);
+                 }
+             }
+             return tempDiv.innerHTML;
+        }
+
+        function addClassToPopupIfMedia(content, popup) {
+            var tempDiv = document.createElement('div');
+            tempDiv.innerHTML = content;
+            var imgTd = tempDiv.querySelector('td img');
+            if (imgTd) {
+                var src = imgTd.getAttribute('src');
+                if (/\.(jpg|jpeg|png|gif|bmp|webp|avif)$/i.test(src)) {
+                    popup._contentNode.classList.add('media');
+                    setTimeout(function() { popup.update(); }, 10);
+                }
+            }
+        }
+
+        var zoomControl = L.control.zoom({ position: 'topleft' }).addTo(map);
+        var bounds_group = new L.featureGroup([]);
+
+        // Base Tile Layers Instantiation
+        map.createPane('pane_GoogleSatellite_0');
+        map.getPane('pane_GoogleSatellite_0').style.zIndex = 400;
+        var layer_GoogleSatellite_0 = L.tileLayer('https://mt1.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', {
+            pane: 'pane_GoogleSatellite_0', opacity: 1.0, minZoom: 1, maxZoom: 28
+        });
+
+        map.createPane('pane_OpenStreetMap_1');
+        map.getPane('pane_OpenStreetMap_1').style.zIndex = 401;
+        var layer_OpenStreetMap_1 = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            pane: 'pane_OpenStreetMap_1', opacity: 1.0, minZoom: 1, maxZoom: 28
+        });
+        
+        // Add default visible basemap
+        map.addLayer(layer_OpenStreetMap_1);
+
+        // Vector Feature Handling Logic Definitions
+        // 2. Sangali Village Boundary
+        function pop_Sangali_village_boundary_2(feature, layer) {
+            var popupContent = '<table><tr><th scope="row">Vill_name</th><td>' + (feature.properties['Vill_name'] !== null ? autolinker.link(String(feature.properties['Vill_name'])) : '') + '</td></tr></table>';
+            layer.bindPopup(removeEmptyRowsFromPopupContent(popupContent, feature), { maxHeight: 400 });
+        }
+        map.createPane('pane_Sangali_village_boundary_2');
+        map.getPane('pane_Sangali_village_boundary_2').style.zIndex = 402;
+        var layer_Sangali_village_boundary_2 = new L.geoJson(json_Sangali_village_boundary_2, {
+            pane: 'pane_Sangali_village_boundary_2',
+            onEachFeature: pop_Sangali_village_boundary_2,
+            style: { color: 'rgba(121,14,3,1.0)', weight: 1.0, fill: false }
+        });
+        map.addLayer(layer_Sangali_village_boundary_2);
+
+        // 3. Solapur Village Boundary
+        function pop_Solapur_village_boundary_3(feature, layer) {
+            var popupContent = '<table><tr><th scope="row">Vill_name</th><td>' + (feature.properties['Vill_name'] !== null ? autolinker.link(String(feature.properties['Vill_name'])) : '') + '</td></tr></table>';
+            layer.bindPopup(removeEmptyRowsFromPopupContent(popupContent, feature), { maxHeight: 400 });
+        }
+        map.createPane('pane_Solapur_village_boundary_3');
+        map.getPane('pane_Solapur_village_boundary_3').style.zIndex = 403;
+        var layer_Solapur_village_boundary_3 = new L.geoJson(json_Solapur_village_boundary_3, {
+            pane: 'pane_Solapur_village_boundary_3',
+            onEachFeature: pop_Solapur_village_boundary_3,
+            style: { color: 'rgba(121,14,3,0.6)', weight: 1.0, fill: false }
+        });
+        map.addLayer(layer_Solapur_village_boundary_3);
+
+        // 4. Sangli Taluka Boundary
+        function pop_Sangli_taluka_boundary_4(feature, layer) {
+            var popupContent = '<table><tr><th scope="row">Sub_dist</th><td>' + (feature.properties['Sub_dist'] !== null ? autolinker.link(String(feature.properties['Sub_dist'])) : '') + '</td></tr></table>';
+            layer.bindPopup(removeEmptyRowsFromPopupContent(popupContent, feature), { maxHeight: 400 });
+        }
+        map.createPane('pane_Sangli_taluka_boundary_4');
+        map.getPane('pane_Sangli_taluka_boundary_4').style.zIndex = 404;
+        var layer_Sangli_taluka_boundary_4 = new L.geoJson(json_Sangli_taluka_boundary_4, {
+            pane: 'pane_Sangli_taluka_boundary_4',
+            onEachFeature: pop_Sangli_taluka_boundary_4,
+            style: { color: 'rgba(77,175,74,1.0)', weight: 2.0, dashArray: '2,4', fill: false }
+        });
+        map.addLayer(layer_Sangli_taluka_boundary_4);
+
+        // 5. Solapur Taluka Boundary
+        function pop_Solapur_taluka_boundary_5(feature, layer) {
+            var popupContent = '<table><tr><th scope="row">Sub_dist</th><td>' + (feature.properties['Sub_dist'] !== null ? autolinker.link(String(feature.properties['Sub_dist'])) : '') + '</td></tr></table>';
+            layer.bindPopup(removeEmptyRowsFromPopupContent(popupContent, feature), { maxHeight: 400 });
+        }
+        map.createPane('pane_Solapur_taluka_boundary_5');
+        map.getPane('pane_Solapur_taluka_boundary_5').style.zIndex = 405;
+        var layer_Solapur_taluka_boundary_5 = new L.geoJson(json_Solapur_taluka_boundary_5, {
+            pane: 'pane_Solapur_taluka_boundary_5',
+            onEachFeature: pop_Solapur_taluka_boundary_5,
+            style: { color: 'rgba(53,121,177,1.0)', weight: 2.0, dashArray: '2,4', fill: false }
+        });
+        map.addLayer(layer_Solapur_taluka_boundary_5);
+
+        // 6. Sangli District Boundary
+        function pop_Sangali_district_boundari_6(feature, layer) {
+            var popupContent = '<table><tr><th scope="row">DISTRICT</th><td>' + (feature.properties['DISTRICT'] !== null ? autolinker.link(String(feature.properties['DISTRICT'])) : '') + '</td></tr></table>';
+            layer.bindPopup(removeEmptyRowsFromPopupContent(popupContent, feature), { maxHeight: 400 });
+        }
+        map.createPane('pane_Sangali_district_boundari_6');
+        map.getPane('pane_Sangali_district_boundari_6').style.zIndex = 406;
+        var layer_Sangali_district_boundari_6 = new L.geoJson(json_Sangali_district_boundari_6, {
+            pane: 'pane_Sangali_district_boundari_6',
+            onEachFeature: pop_Sangali_district_boundari_6,
+            style: { color: 'rgba(255,127,0,1.0)', weight: 3.0, dashArray: '15,3,6,3', fill: false }
+        });
+        map.addLayer(layer_Sangali_district_boundari_6);
+
+        // 7. Solapur District Boundary
+        function pop_Solapur_district_boundari_7(feature, layer) {
+            var popupContent = '<table><tr><th scope="row">DISTRICT</th><td>' + (feature.properties['DISTRICT'] !== null ? autolinker.link(String(feature.properties['DISTRICT'])) : '') + '</td></tr></table>';
+            layer.bindPopup(removeEmptyRowsFromPopupContent(popupContent, feature), { maxHeight: 400 });
+        }
+        map.createPane('pane_Solapur_district_boundari_7');
+        map.getPane('pane_Solapur_district_boundari_7').style.zIndex = 407;
+        var layer_Solapur_district_boundari_7 = new L.geoJson(json_Solapur_district_boundari_7, {
+            pane: 'pane_Solapur_district_boundari_7',
+            onEachFeature: pop_Solapur_district_boundari_7,
+            style: { color: 'rgba(255,127,0,1.0)', weight: 3.0, fill: false }
+        });
+        map.addLayer(layer_Solapur_district_boundari_7);
+
+        // 8. GPS Points Layer
+        function pop_gps_points_8(feature, layer) {
+            var popupContent = '<table>\
+                    <tr><th scope="row">Location</th><td>' + (feature.properties['Location'] !== null ? autolinker.link(String(feature.properties['Location'])) : '') + '</td></tr>\
+                    <tr><th scope="row">Longitu</th><td>' + (feature.properties['Longitu'] !== null ? autolinker.link(String(feature.properties['Longitu'])) : '') + '</td></tr>\
+                    <tr><th scope="row">Latitud</th><td>' + (feature.properties['Latitud'] !== null ? autolinker.link(String(feature.properties['Latitud'])) : '') + '</td></tr>\
+                    <tr><td colspan="2">' + (feature.properties['Images'] !== null ? '<img src="images/' + String(feature.properties['Images']).replace(/[\\/:]/g, '_').trim() + '" style="max-width:200px; border-radius:6px; margin-top:8px;">' : '') + '</td></tr>\
+                </table>';
+            var content = removeEmptyRowsFromPopupContent(popupContent, feature);
+            layer.on('popupopen', function(e) { addClassToPopupIfMedia(content, e.popup); });
+            layer.bindPopup(content, { maxHeight: 400 });
+        }
+        map.createPane('pane_gps_points_8');
+        map.getPane('pane_gps_points_8').style.zIndex = 408;
+        var layer_gps_points_8 = new L.geoJson(json_gps_points_8, {
+            pane: 'pane_gps_points_8',
+            onEachFeature: pop_gps_points_8,
+            pointToLayer: function (feature, latlng) {
+                return L.circleMarker(latlng, { radius: 5.0, opacity: 1, color: 'rgba(35,35,35,1.0)', weight: 1, fill: true, fillColor: 'rgba(225,0,25,1.0)' });
+            },
+        });
+        map.addLayer(layer_gps_points_8);
+
+        // Object Directory for Interactive Legend Mapping Lookup
+        var layerMap = {
+            'gps_points': layer_gps_points_8,
+            'sangli_district': layer_Sangali_district_boundari_6,
+            'solapur_district': layer_Solapur_district_boundari_7,
+            'sangli_taluka': layer_Sangli_taluka_boundary_4,
+            'solapur_taluka': layer_Solapur_taluka_boundary_5,
+            'sangli_village': layer_Sangali_village_boundary_2,
+            'solapur_village': layer_Solapur_village_boundary_3
+        };
+
+        // Interactive Feature Layer Controller Actions
+        function toggleMapLayer(layerKey, element) {
+            var selectedLayer = layerMap[layerKey];
+            if (map.hasLayer(selectedLayer)) {
+                map.removeLayer(selectedLayer);
+                element.classList.remove('active');
+            } else {
+                map.addLayer(selectedLayer);
+                element.classList.add('active');
+            }
+        }
+
+        // Basemap Switching Module Architecture
+        function switchBasemap(type) {
+            document.getElementById('btn-satellite').classList.remove('active');
+            document.getElementById('btn-osm').classList.remove('active');
+            
+            if (type === 'satellite') {
+                if (map.hasLayer(layer_OpenStreetMap_1)) map.removeLayer(layer_OpenStreetMap_1);
+                if (!map.hasLayer(layer_GoogleSatellite_0)) map.addLayer(layer_GoogleSatellite_0);
+                document.getElementById('btn-satellite').classList.add('active');
+            } else {
+                if (map.hasLayer(layer_GoogleSatellite_0)) map.removeLayer(layer_GoogleSatellite_0);
+                if (!map.hasLayer(layer_OpenStreetMap_1)) map.addLayer(layer_OpenStreetMap_1);
+                document.getElementById('btn-osm').classList.add('active');
+            }
+        }
+        </script>        
+    </body>
+</html>
