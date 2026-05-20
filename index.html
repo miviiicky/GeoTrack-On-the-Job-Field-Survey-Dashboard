@@ -588,9 +588,13 @@
         function pop_gps_points_8(feature, layer) {
             var popupContent = '<table>\
                     <tr><th scope="row">Location</th><td>' + (feature.properties['Location'] !== null ? autolinker.link(String(feature.properties['Location'])) : '') + '</td></tr>\
-                    <tr><td colspan="2">' + (feature.properties['Images'] !== null ? '<img src="images/' + String(feature.properties['Images']).replace(/[\\/:]/g, '_').trim() + '" style="max-width:200px;border-radius:6px;">' : '') + '</td></tr>\
+                    <tr><th scope="row">Longitu</th><td>' + (feature.properties['Longitu'] !== null ? autolinker.link(String(feature.properties['Longitu'])) : '') + '</td></tr>\
+                    <tr><th scope="row">Latitud</th><td>' + (feature.properties['Latitud'] !== null ? autolinker.link(String(feature.properties['Latitud'])) : '') + '</td></tr>\
+                    <tr><td colspan="2">' + (feature.properties['Images'] !== null ? '<img src="images/' + String(feature.properties['Images']).replace(/[\\/:]/g, '_').trim() + '" style="max-width:200px; border-radius:6px; margin-top:8px;">' : '') + '</td></tr>\
                 </table>';
-            layer.bindPopup(removeEmptyRowsFromPopupContent(popupContent, feature), { maxHeight: 400 });
+            var content = removeEmptyRowsFromPopupContent(popupContent, feature);
+            layer.on('popupopen', function(e) { addClassToPopupIfMedia(content, e.popup); });
+            layer.bindPopup(content, { maxHeight: 400 });
         }
         map.createPane('pane_gps_points_8');
         map.getPane('pane_gps_points_8').style.zIndex = 408;
@@ -598,7 +602,7 @@
             pane: 'pane_gps_points_8',
             onEachFeature: pop_gps_points_8,
             pointToLayer: function (feature, latlng) {
-                return L.circleMarker(latlng, { radius: 5.0, opacity: 1, color: '#232323', weight: 1, fill: true, fillColor: '#e10019' });
+                return L.circleMarker(latlng, { radius: 5.0, opacity: 1, color: 'rgba(35,35,35,1.0)', weight: 1, fill: true, fillColor: 'rgba(225,0,25,1.0)' });
             },
         });
         map.addLayer(layer_gps_points_8);
