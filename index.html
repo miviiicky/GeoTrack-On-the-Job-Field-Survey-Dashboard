@@ -315,7 +315,7 @@
                 }
             }
         </style>
-        <title>Sangli-Solapur Geoinformatics Portal</title>
+        <title>GeoTrack: On-the-Job Field Survey Dashboard</title>
     </head>
     <body>
         
@@ -326,7 +326,7 @@
                 <div class="sidebar-header">
                     <div class="header-icon"><i class="fas fa-globe"></i></div>
                     <div>
-                        <h1>Sangli-Solapur <span>Geoinformatics</span> Portal</h1>
+                        <h1>GeoTrack: <span>On-the-Job Field Survey</span> Dashboard</h1>
                     </div>
                 </div>
 
@@ -335,20 +335,15 @@
                     <div class="panel-card">
                         <div class="panel-title"><span class="panel-title-icon"></span>Project Info</div>
                         <table class="info-table">
-                            <tr><td class="info-label">PROJECT</td><td class="info-value">Sangli & Solapur District GIS Mapping</td></tr>
-                            <tr><td class="info-label">INSTITUTE</td><td class="info-value">Punyashlok Ahilyadevi Holkar Solapur University</td></tr>
-                            <tr><td class="info-label">DEPT.</td><td class="info-value">School of Earth Sciences</td></tr>
+                            <tr><td class="info-label">NAME</td><td class="info-value">Onkar Kishor Pandhare</td></tr>
                             <tr><td class="info-label">PROGRAM</td><td class="info-value">MSc Geoinformatics</td></tr>
-                            <tr>
-                                <td class="info-label">COVERAGE</td>
-                                <td class="info-value">
-                                    <div class="tags-container">
-                                        <span class="tag">Village Boundaries</span>
-                                        <span class="tag">Taluka Boundaries</span>
-                                        <span class="tag">District Boundaries</span>
-                                        <span class="tag">GPS Points</span>
-                                    </div>
-                                </td>
+                            <tr><td class="info-label">DEPARTMENT</td><td class="info-value">School of Earth Sciences</td></tr>
+                            <tr><td class="info-label">UNIVERSITY</td><td class="info-value">Punyashlok Ahilyadevi Holkar Solapur University, Solapur</td></tr>
+                            <tr><td class="info-label">GUIDANCE BY</td><td class="info-value">Dr. Vinayak P. Dhulap - Director, School of Earth Sciences, PAHSUS</td></tr>
+                            <tr><td class="info-label">OJT Agency</td><td class="info-value">Pruthvi Consultant Surveying Agency, Sangli</td></tr>
+                             <tr><td class="info-label">PROJECT</td><td class="info-value">Geospatial Dashboard for Field Work Verification & Asset Mapping: Sangli - Solapur Region</td></tr>
+                            </tr>
+                            <tr><td class="info-label">Training Period:</td><td class="info-value" style="color: #64748b;"> 27 April 2026 to 11 May 2026</td></tr>
                             </tr>
                         </table>
                     </div>
@@ -367,7 +362,7 @@
 
                             <div class="legend-item" id="sb-satellite" onclick="switchBasemap('satellite')">
                                 <div class="legend-left">
-                                    <span class="symbol"><i class="fas fa-satellite" style="color: var(--accent-blue);"></i></span>
+                                    <span class="symbol"><i class="fas fa-globe" style="color: var(--accent-blue);"></i></span>
                                     <span class="legend-label">Google Satellite View</span>
                                 </div>
                                 <div class="indicator-dot"></div>
@@ -441,8 +436,8 @@
                 </div>
 
                 <div class="sidebar-footer">
-                    Punyashlok Ahilyadevi Holkar Solapur University<br>
-                    Department of Earth Sciences &copy; 2026
+                    Designed & Developed by: Onkar Kishor Pandhare<br>
+                    MSc Geoinformatics PAHSUS &copy; 2026
                 </div>
             </div>
 
@@ -606,6 +601,7 @@
             },
         });
         map.addLayer(layer_gps_points_8);
+
 
         // Core UI References Lookups Map Dictionary
         var layerMap = {
