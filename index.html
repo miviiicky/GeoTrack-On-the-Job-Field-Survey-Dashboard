@@ -1,596 +1,498 @@
-
 <!doctype html>
 <html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="initial-scale=1,user-scalable=no,maximum-scale=1,width=device-width">
+        <meta name="mobile-web-app-capable" content="yes">
+        <meta name="apple-mobile-web-app-capable" content="yes">
+        
+        <link rel="stylesheet" href="css/leaflet.css">
+        <link rel="stylesheet" href="css/L.Control.Layers.Tree.css">
+        <link rel="stylesheet" href="css/qgis2web.css">
+        <link rel="stylesheet" href="css/fontawesome-all.min.css">
+        <link rel="stylesheet" href="css/leaflet.photon.css">
 
-<head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="initial-scale=1,user-scalable=no,maximum-scale=1,width=device-width">
-    <meta name="mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-
-    <link rel="stylesheet" href="css/leaflet.css">
-    <link rel="stylesheet" href="css/L.Control.Layers.Tree.css">
-    <link rel="stylesheet" href="css/qgis2web.css">
-    <link rel="stylesheet" href="css/fontawesome-all.min.css">
-    <link rel="stylesheet" href="css/leaflet.photon.css">
-
-    <style>
-        :root {
-            --bg-main: #030a16;
-            --bg-sidebar: #061023;
-            --bg-card: #0a162d;
-            --bg-item: #0f2447;
-            --border-color: #142847;
-            --text-main: #e2e8f0;
-            --text-muted: #64748b;
-            --accent-blue: #38bdf8;
-            --accent-active: #0070f3;
-            --highlight-red: #ff3333;
-        }
-
-        html,
-        body {
-            width: 100%;
-            height: 100%;
-            padding: 0;
-            margin: 0;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-            background-color: var(--bg-main);
-            color: var(--text-main);
-            overflow: hidden;
-        }
-
-        .app-container {
-            display: flex;
-            width: 100vw;
-            height: 100vh;
-            position: relative;
-        }
-
-        /* Desktop Responsive Navigation Shell Layout */
-        .sidebar {
-            width: 380px;
-            min-width: 380px;
-            background: var(--bg-sidebar);
-            border-right: 1px solid var(--border-color);
-            display: flex;
-            flex-direction: column;
-            z-index: 1050;
-            box-shadow: 5px 0 25px rgba(0, 0, 0, 0.5);
-            transition: transform 0.3s ease;
-        }
-
-        .sidebar-header {
-            background: linear-gradient(180deg, #0b1a33 0%, var(--bg-sidebar) 100%);
-            padding: 20px;
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            border-bottom: 1px solid var(--border-color);
-        }
-
-        .header-icon {
-            background: var(--accent-active);
-            color: #fff;
-            width: 42px;
-            height: 42px;
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 20px;
-            box-shadow: 0 0 15px rgba(0, 112, 243, 0.4);
-        }
-
-        .sidebar-header h1 {
-            font-size: 15px;
-            margin: 0;
-            font-weight: 700;
-            color: #ffffff;
-            letter-spacing: 0.5px;
-        }
-
-        .sidebar-header h1 span {
-            color: var(--accent-blue);
-        }
-
-        .sidebar-content {
-            flex: 1;
-            overflow-y: auto;
-            padding: 20px;
-        }
-
-        .panel-card {
-            background: var(--bg-card);
-            border: 1px solid var(--border-color);
-            border-radius: 12px;
-            padding: 16px;
-            margin-bottom: 20px;
-        }
-
-        .panel-title {
-            font-size: 12px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            color: var(--text-muted);
-            font-weight: 700;
-            margin-bottom: 15px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            border-bottom: 1px solid var(--border-color);
-            padding-bottom: 8px;
-        }
-
-        .panel-title-icon {
-            width: 8px;
-            height: 8px;
-            background: var(--accent-blue);
-            border-radius: 2px;
-            display: inline-block;
-        }
-
-        /* Parameters Data Properties Layout Block */
-        .info-table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-
-        .info-table td {
-            padding: 6px 0;
-            vertical-align: top;
-            font-size: 13px;
-        }
-
-        .info-label {
-            color: var(--text-muted);
-            width: 90px;
-            font-weight: 600;
-        }
-
-        .info-value {
-            color: #cbd5e1;
-        }
-
-        .tags-container {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 6px;
-            margin-top: 8px;
-        }
-
-        .tag {
-            background: var(--bg-item);
-            border: 1px solid #1e3a66;
-            color: var(--accent-blue);
-            font-size: 11px;
-            padding: 4px 8px;
-            border-radius: 6px;
-            font-weight: 500;
-        }
-
-        /* Interactive Control Legend Mapping Rows */
-        .legend-list {
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-        }
-
-        .legend-item {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 12px;
-            background: var(--bg-item);
-            border: 1px solid #1e3a66;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            user-select: none;
-        }
-
-        .legend-item:hover {
-            background: #173564;
-            border-color: #254e8c;
-        }
-
-        .legend-item.active {
-            background: #112952;
-            border-color: var(--accent-blue);
-        }
-
-        .legend-left {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .legend-label {
-            font-size: 13px;
-            font-weight: 500;
-            color: #cbd5e1;
-        }
-
-        /* Geometric Indicator Styling Rules */
-        .symbol {
-            width: 16px;
-            height: 16px;
-            display: inline-block;
-            flex-shrink: 0;
-            transition: background 0.2s ease;
-        }
-
-        .symbol-point {
-            border-radius: 50%;
-            background: #e10019;
-            border: 2px solid #fff;
-        }
-
-        .symbol-line {
-            height: 4px;
-            border-radius: 2px;
-            margin-top: 6px;
-        }
-
-        /* Dynamic state switches */
-        .legend-item.active .symbol-line {
-            background: var(--highlight-red) !important;
-            box-shadow: 0 0 6px var(--highlight-red);
-        }
-
-        .indicator-dot {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            background: #475569;
-            transition: all 0.2s ease;
-        }
-
-        .legend-item.active .indicator-dot {
-            background: #10b981;
-            box-shadow: 0 0 8px #10b981;
-        }
-
-        /* Map Component Framework Wrapper */
-        .map-container {
-            flex: 1;
-            position: relative;
-            height: 100%;
-        }
-
-        #map {
-            width: 100%;
-            height: 100%;
-            background-color: var(--bg-main);
-        }
-
-        /* Mobile UI Component Placements */
-        .mobile-menu-toggle {
-            display: none;
-            position: absolute;
-            top: 15px;
-            left: 15px;
-            z-index: 1100;
-            background: #ffffff;
-            color: #333333;
-            border: none;
-            width: 44px;
-            height: 44px;
-            border-radius: 8px;
-            font-size: 20px;
-            cursor: pointer;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
-            align-items: center;
-            justify-content: center;
-        }
-
-        /* Floating Quick Basemap Action Module Panel */
-        .floating-basemap-group {
-            position: absolute;
-            top: 15px;
-            right: 15px;
-            z-index: 1000;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-
-        .floating-btn {
-            width: 44px;
-            height: 44px;
-            border-radius: 8px;
-            background: #ffffff;
-            color: #333333;
-            border: none;
-            cursor: pointer;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 16px;
-            transition: all 0.2s ease;
-        }
-
-        .floating-btn.active {
-            background: var(--accent-active);
-            color: #ffffff;
-            box-shadow: 0 0 12px rgba(0, 112, 243, 0.5);
-        }
-
-        /* Mobile Bottom Info Card Placement Overlay */
-        .bottom-info-card {
-            position: absolute;
-            bottom: 25px;
-            left: 20px;
-            right: 20px;
-            background: #ffffff;
-            color: #1e293b;
-            border-radius: 12px;
-            padding: 16px;
-            box-shadow: 0 4px 25px rgba(0, 0, 0, 0.15);
-            z-index: 999;
-            max-width: 340px;
-        }
-
-        .bottom-info-card h3 {
-            margin: 0 0 6px 0;
-            font-size: 16px;
-            font-weight: 700;
-            color: #0f172a;
-        }
-
-        .bottom-info-card p {
-            margin: 4px 0;
-            font-size: 13px;
-            color: #475569;
-        }
-
-        .sidebar-overlay {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.5);
-            z-index: 1040;
-        }
-
-        .sidebar-footer {
-            padding: 15px 20px;
-            background: #0b1a33;
-            border-top: 1px solid var(--border-color);
-            font-size: 11px;
-            color: var(--text-muted);
-            text-align: center;
-            line-height: 1.4;
-        }
-
-        /* Responsive Layout Adaptation Rules Media Queries */
-        @media (max-width: 991px) {
-            .sidebar {
-                position: fixed;
-                left: 0;
-                top: 0;
-                bottom: 0;
-                transform: translateX(-100%);
+        <style>
+            :root {
+                --bg-main: #030a16;
+                --bg-sidebar: #061023;
+                --bg-card: #0a162d;
+                --bg-item: #0f2447;
+                --border-color: #142847;
+                --text-main: #e2e8f0;
+                --text-muted: #64748b;
+                --accent-blue: #38bdf8;
+                --accent-active: #0070f3;
+                --highlight-red: #ff3333;
             }
 
-            .sidebar.open {
-                transform: translateX(0);
+            html, body {
+                width: 100%;
+                height: 100%;
+                padding: 0;
+                margin: 0;
+                font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+                background-color: var(--bg-main);
+                color: var(--text-main);
+                overflow: hidden;
             }
 
-            .mobile-menu-toggle {
+            .app-container {
                 display: flex;
+                width: 100vw;
+                height: 100vh;
+                position: relative;
             }
 
-            .sidebar.open~.sidebar-overlay {
-                display: block;
+            /* Responsive Sidebar Container */
+            .sidebar {
+                width: 380px;
+                min-width: 380px;
+                background: var(--bg-sidebar);
+                border-right: 1px solid var(--border-color);
+                display: flex;
+                flex-direction: column;
+                z-index: 1050;
+                box-shadow: 5px 0 25px rgba(0,0,0,0.5);
+                transition: transform 0.3s ease;
             }
 
-            .bottom-info-card {
-                left: 50%;
-                transform: translateX(-50%);
-                width: calc(100% - 40px);
-                max-width: 100%;
-                bottom: 30px;
+            .sidebar-header {
+                background: linear-gradient(180deg, #0b1a33 0%, var(--bg-sidebar) 100%);
+                padding: 20px;
+                display: flex;
+                align-items: center;
+                gap: 15px;
+                border-bottom: 1px solid var(--border-color);
             }
-        }
-    </style>
-    <title>Sangli-Solapur Geoinformatics Portal</title>
-</head>
 
-<body>
+            .header-icon {
+                background: var(--accent-active);
+                color: #fff;
+                width: 42px;
+                height: 42px;
+                border-radius: 10px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 20px;
+                box-shadow: 0 0 15px rgba(0, 112, 243, 0.4);
+            }
 
-    <div class="app-container">
-        <button class="mobile-menu-toggle" onclick="toggleSidebar()"><i class="fas fa-bars"></i></button>
+            .sidebar-header h1 {
+                font-size: 15px;
+                margin: 0;
+                font-weight: 700;
+                color: #ffffff;
+                letter-spacing: 0.5px;
+            }
 
-        <div class="sidebar" id="appSidebar">
-            <div class="sidebar-header">
-                <div class="header-icon"><i class="fas fa-globe"></i></div>
-                <div>
-                    <h1>Sangli-Solapur <span>Geoinformatics</span> Portal</h1>
-                </div>
-            </div>
+            .sidebar-header h1 span {
+                color: var(--accent-blue);
+            }
 
-            <div class="sidebar-content">
-                <div class="panel-card">
-                    <div class="panel-title"><span class="panel-title-icon"></span>Project Info</div>
-                    <table class="info-table">
-                        <tr>
-                            <td class="info-label">PROJECT</td>
-                            <td class="info-value">Sangli & Solapur District GIS Mapping</td>
-                        </tr>
-                        <tr>
-                            <td class="info-label">INSTITUTE</td>
-                            <td class="info-value">Punyashlok Ahilyadevi Holkar Solapur University</td>
-                        </tr>
-                        <tr>
-                            <td class="info-label">DEPT.</td>
-                            <td class="info-value">School of Earth Sciences</td>
-                        </tr>
-                        <tr>
-                            <td class="info-label">PROGRAM</td>
-                            <td class="info-value">MSc Geoinformatics</td>
-                        </tr>
-                        <tr>
-                            <td class="info-label">COVERAGE</td>
-                            <td class="info-value">
-                                <div class="tags-container">
-                                    <span class="tag">Village Boundaries</span>
-                                    <span class="tag">Taluka Boundaries</span>
-                                    <span class="tag">District Boundaries</span>
-                                    <span class="tag">GPS Points</span>
-                                </div>
-                            </td>
-                        </tr>
-                    </table>
-                </div>
+            .sidebar-content {
+                flex: 1;
+                overflow-y: auto;
+                padding: 20px;
+            }
 
-                <div class="panel-card">
-                    <div class="panel-title"><span class="panel-title-icon"></span>Legend Layer Toggles</div>
-                    <div class="legend-list">
+            .panel-card {
+                background: var(--bg-card);
+                border: 1px solid var(--border-color);
+                border-radius: 12px;
+                padding: 16px;
+                margin-bottom: 20px;
+            }
 
-                        <div class="legend-item active" data-layer="gps_points"
-                            onclick="toggleMapLayer('gps_points', this)">
-                            <div class="legend-left">
-                                <span class="symbol symbol-point"></span>
-                                <span class="legend-label">GPS Survey Points</span>
-                            </div>
-                            <div class="indicator-dot"></div>
-                        </div>
+            .panel-title {
+                font-size: 12px;
+                text-transform: uppercase;
+                letter-spacing: 1px;
+                color: var(--text-muted);
+                font-weight: 700;
+                margin-bottom: 15px;
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                border-bottom: 1px solid var(--border-color);
+                padding-bottom: 8px;
+            }
 
-                        <div class="legend-item active" data-layer="sangli_district"
-                            onclick="toggleMapLayer('sangli_district', this)">
-                            <div class="legend-left">
-                                <span class="symbol symbol-line" style="background: rgba(255,127,0,1.0);"></span>
-                                <span class="legend-label">District Boundary (Sangli)</span>
-                            </div>
-                            <div class="indicator-dot"></div>
-                        </div>
+            .panel-title-icon {
+                width: 8px;
+                height: 8px;
+                background: var(--accent-blue);
+                border-radius: 2px;
+                display: inline-block;
+            }
 
-                        <div class="legend-item active" data-layer="solapur_district"
-                            onclick="toggleMapLayer('solapur_district', this)">
-                            <div class="legend-left">
-                                <span class="symbol symbol-line" style="background: rgba(255,127,0,1.0);"></span>
-                                <span class="legend-label">District Boundary (Solapur)</span>
-                            </div>
-                            <div class="indicator-dot"></div>
-                        </div>
+            .info-table {
+                width: 100%;
+                border-collapse: collapse;
+            }
 
-                        <div class="legend-item active" data-layer="sangli_taluka"
-                            onclick="toggleMapLayer('sangli_taluka', this)">
-                            <div class="legend-left">
-                                <span class="symbol symbol-line" style="background: rgba(77,175,74,1.0);"></span>
-                                <span class="legend-label">Taluka Boundary (Sangli)</span>
-                            </div>
-                            <div class="indicator-dot"></div>
-                        </div>
+            .info-table td {
+                padding: 6px 0;
+                vertical-align: top;
+                font-size: 13px;
+            }
 
-                        <div class="legend-item active" data-layer="solapur_taluka"
-                            onclick="toggleMapLayer('solapur_taluka', this)">
-                            <div class="legend-left">
-                                <span class="symbol symbol-line" style="background: rgba(53,121,177,1.0);"></span>
-                                <span class="legend-label">Taluka Boundary (Solapur)</span>
-                            </div>
-                            <div class="indicator-dot"></div>
-                        </div>
+            .info-label {
+                color: var(--text-muted);
+                width: 90px;
+                font-weight: 600;
+            }
 
-                        <div class="legend-item active" data-layer="sangli_village"
-                            onclick="toggleMapLayer('sangli_village', this)">
-                            <div class="legend-left">
-                                <span class="symbol symbol-line" style="background: rgba(121,14,3,1.0);"></span>
-                                <span class="legend-label">Village Boundary (Sangli)</span>
-                            </div>
-                            <div class="indicator-dot"></div>
-                        </div>
+            .info-value {
+                color: #cbd5e1;
+            }
 
-                        <div class="legend-item active" data-layer="solapur_village"
-                            onclick="toggleMapLayer('solapur_village', this)">
-                            <div class="legend-left">
-                                <span class="symbol symbol-line" style="background: rgba(121,14,3,0.6);"></span>
-                                <span class="legend-label">Village Boundary (Solapur)</span>
-                            </div>
-                            <div class="indicator-dot"></div>
-                        </div>
+            .tags-container {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 6px;
+                margin-top: 8px;
+            }
 
-                    </div>
-                </div>
-            </div>
+            .tag {
+                background: var(--bg-item);
+                border: 1px solid #1e3a66;
+                color: var(--accent-blue);
+                font-size: 11px;
+                padding: 4px 8px;
+                border-radius: 6px;
+                font-weight: 500;
+            }
 
-            <div class="sidebar-footer">
-                Punyashlok Ahilyadevi Holkar Solapur University<br>
-                Department of Earth Sciences &copy; 2026
-            </div>
-        </div>
+            /* Unified Navigation List Item Styles */
+            .legend-list {
+                display: flex;
+                flex-direction: column;
+                gap: 6px;
+            }
 
-        <div class="sidebar-overlay" onclick="toggleSidebar()"></div>
+            .legend-item {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                padding: 12px;
+                background: var(--bg-item);
+                border: 1px solid #1e3a66;
+                border-radius: 8px;
+                cursor: pointer;
+                transition: all 0.2s ease;
+                user-select: none;
+            }
 
-        <div class="map-container">
-            <div id="map"></div>
+            .legend-item:hover {
+                background: #173564;
+                border-color: #254e8c;
+            }
 
-            <div class="floating-basemap-group">
-                <button class="floating-btn active" id="float-osm" onclick="switchBasemap('osm')"
-                    title="OpenStreetMap Layer View">
-                    <i class="fas fa-map"></i>
-                </button>
-                <button class="floating-btn" id="float-satellite" onclick="switchBasemap('satellite')"
-                    title="Google Satellite View">
-                    <i class="fas fa-satellite"></i>
-                </button>
-            </div>
+            .legend-item.active {
+                background: #112952;
+                border-color: var(--accent-blue);
+            }
 
-            <div class="bottom-info-card">
-                <h3>Sangli District</h3>
-                <p><strong>Area:</strong> ~8,572 km²</p>
-                <p><strong>Population:</strong> ~28.7 lakhs</p>
-                <p style="font-size: 11px; color: #94a3b8; margin-top: 6px;">Coordinates: 17.6336°N, 74.4269°E</p>
-            </div>
-        </div>
-    </div>
+            .legend-left {
+                display: flex;
+                align-items: center;
+                gap: 12px;
+            }
 
-    <script src="js/qgis2web_expressions.js"></script>
-    <script src="js/leaflet.js"></script>
-    <script src="js/L.Control.Layers.Tree.min.js"></script>
-    <script src="js/leaflet.rotatedMarker.js"></script>
-    <script src="js/leaflet.pattern.js"></script>
-    <script src="js/leaflet-hash.js"></script>
-    <script src="js/Autolinker.min.js"></script>
-    <script src="js/rbush.min.js"></script>
-    <script src="js/labelgun.min.js"></script>
-    <script src="js/labels.js"></script>
-    <script src="js/leaflet.photon.js"></script>
+            .legend-label {
+                font-size: 13px;
+                font-weight: 500;
+                color: #cbd5e1;
+            }
 
-    <script src="data/Sangali_village_boundary_2.js"></script>
-    <script src="data/Solapur_village_boundary_3.js"></script>
-    <script src="data/Sangli_taluka_boundary_4.js"></script>
-    <script src="data/Solapur_taluka_boundary_5.js"></script>
-    <script src="data/Sangali_district_boundari_6.js"></script>
-    <script src="data/Solapur_district_boundari_7.js"></script>
-    <script src="data/gps_points_8.js"></script>
+            .symbol {
+                width: 16px;
+                height: 16px;
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                flex-shrink: 0;
+            }
 
-    <script>
-        // Init Leaflet Instance
-        var map = L.map('map', {
-            zoomControl: false, maxZoom: 28, minZoom: 1
-        }).fitBounds([[16.974818981021276, 74.51541717683808], [17.457599199536457, 75.45625926668048]]);
+            .symbol-point {
+                border-radius: 50%;
+                background: #e10019;
+                border: 2px solid #fff;
+            }
 
-        var hash = new L.Hash(map);
-        var autolinker = new Autolinker({ truncate: { length: 30, location: 'smart' } });
+            .symbol-line {
+                height: 4px;
+                border-radius: 2px;
+            }
 
-        function removeEmptyRowsFromPopupContent(content, feature) {
-            var tempDiv = document.createElement('div');
-            tempDiv.innerHTML = content;
-            var rows = tempDiv.querySelectorAll('tr');
-            for (var i = 0; i < rows.length; i++) {
-                var td = rows[i].querySelector('td.visible-with-data');
-                var key = td ? td.id : '';
-                if (td && td.classList.contains('visible-with-data') && feature.properties[key] == null) {
-                    rows[i].parentNode.removeChild(rows[i]);
+            .indicator-dot {
+                width: 8px;
+                height: 8px;
+                border-radius: 50%;
+                background: #475569;
+                transition: all 0.2s ease;
+            }
+
+            .legend-item.active .indicator-dot {
+                background: #10b981;
+                box-shadow: 0 0 8px #10b981;
+            }
+
+            /* Map Workspace Layout Area */
+            .map-container {
+                flex: 1;
+                position: relative;
+                height: 100%;
+            }
+
+            #map {
+                width: 100%;
+                height: 100%;
+                background-color: var(--bg-main);
+            }
+
+            /* Mobile Layer Panel Hamburger Trigger Toggle Button */
+            .mobile-menu-toggle {
+                display: none;
+                position: absolute;
+                top: 15px;
+                left: 15px;
+                z-index: 1100;
+                background: #ffffff;
+                color: #333333;
+                border: none;
+                width: 44px;
+                height: 44px;
+                border-radius: 8px;
+                font-size: 20px;
+                cursor: pointer;
+                box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+                align-items: center;
+                justify-content: center;
+            }
+
+            .sidebar-overlay {
+                display: none;
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: rgba(0,0,0,0.5);
+                z-index: 1040;
+            }
+
+            .sidebar-footer {
+                padding: 15px 20px;
+                background: #0b1a33;
+                border-top: 1px solid var(--border-color);
+                font-size: 11px;
+                color: var(--text-muted);
+                text-align: center;
+                line-height: 1.4;
+            }
+
+            /* Responsive Device Breakpoints Viewports Layout Rules */
+            @media (max-width: 991px) {
+                .sidebar {
+                    position: fixed;
+                    left: 0;
+                    top: 0;
+                    bottom: 0;
+                    transform: translateX(-100%);
+                }
+                .sidebar.open {
+                    transform: translateX(0);
+                }
+                .mobile-menu-toggle {
+                    display: flex;
+                }
+                .sidebar.open ~ .sidebar-overlay {
+                    display: block;
                 }
             }
-            return tempDiv.innerHTML;
+        </style>
+        <title>Sangli-Solapur Geoinformatics Portal</title>
+    </head>
+    <body>
+        
+        <div class="app-container">
+            <button class="mobile-menu-toggle" onclick="toggleSidebar()"><i class="fas fa-bars"></i></button>
+
+            <div class="sidebar" id="appSidebar">
+                <div class="sidebar-header">
+                    <div class="header-icon"><i class="fas fa-globe"></i></div>
+                    <div>
+                        <h1>Sangli-Solapur <span>Geoinformatics</span> Portal</h1>
+                    </div>
+                </div>
+
+                <div class="sidebar-content">
+                    
+                    <div class="panel-card">
+                        <div class="panel-title"><span class="panel-title-icon"></span>Basemap Options</div>
+                        <div class="legend-list">
+                            
+                            <div class="legend-item active" id="sb-osm" onclick="switchBasemap('osm')">
+                                <div class="legend-left">
+                                    <span class="symbol"><i class="fas fa-map" style="color: var(--accent-blue);"></i></span>
+                                    <span class="legend-label">OpenStreetMap View</span>
+                                </div>
+                                <div class="indicator-dot"></div>
+                            </div>
+
+                            <div class="legend-item" id="sb-satellite" onclick="switchBasemap('satellite')">
+                                <div class="legend-left">
+                                    <span class="symbol"><i class="fas fa-satellite" style="color: var(--accent-blue);"></i></span>
+                                    <span class="legend-label">Google Satellite View</span>
+                                </div>
+                                <div class="indicator-dot"></div>
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <div class="panel-card">
+                        <div class="panel-title"><span class="panel-title-icon"></span>Project Info</div>
+                        <table class="info-table">
+                            <tr><td class="info-label">PROJECT</td><td class="info-value">Sangli & Solapur District GIS Mapping</td></tr>
+                            <tr><td class="info-label">INSTITUTE</td><td class="info-value">Punyashlok Ahilyadevi Holkar Solapur University</td></tr>
+                            <tr><td class="info-label">DEPT.</td><td class="info-value">School of Earth Sciences</td></tr>
+                            <tr><td class="info-label">PROGRAM</td><td class="info-value">MSc Geoinformatics</td></tr>
+                            <tr>
+                                <td class="info-label">COVERAGE</td>
+                                <td class="info-value">
+                                    <div class="tags-container">
+                                        <span class="tag">Village Boundaries</span>
+                                        <span class="tag">Taluka Boundaries</span>
+                                        <span class="tag">District Boundaries</span>
+                                        <span class="tag">GPS Points</span>
+                                    </div>
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+
+                    <div class="panel-card">
+                        <div class="panel-title"><span class="panel-title-icon"></span>Map Boundary Options</div>
+                        <div class="legend-list">
+                            
+                            <div class="legend-item active" data-layer="gps_points" onclick="toggleMapLayer('gps_points', this)">
+                                <div class="legend-left">
+                                    <span class="symbol symbol-point"></span>
+                                    <span class="legend-label">GPS Survey Points</span>
+                                </div>
+                                <div class="indicator-dot"></div>
+                            </div>
+
+                            <div class="legend-item active" data-layer="sangli_district" onclick="toggleMapLayer('sangli_district', this)">
+                                <div class="legend-left">
+                                    <span class="symbol symbol-line" style="background: rgba(255,127,0,1.0);"></span>
+                                    <span class="legend-label">District Boundary (Sangli)</span>
+                                </div>
+                                <div class="indicator-dot"></div>
+                            </div>
+
+                            <div class="legend-item active" data-layer="solapur_district" onclick="toggleMapLayer('solapur_district', this)">
+                                <div class="legend-left">
+                                    <span class="symbol symbol-line" style="background: rgba(255,127,0,1.0);"></span>
+                                    <span class="legend-label">District Boundary (Solapur)</span>
+                                </div>
+                                <div class="indicator-dot"></div>
+                            </div>
+
+                            <div class="legend-item active" data-layer="sangli_taluka" onclick="toggleMapLayer('sangli_taluka', this)">
+                                <div class="legend-left">
+                                    <span class="symbol symbol-line" style="background: rgba(77,175,74,1.0);"></span>
+                                    <span class="legend-label">Taluka Boundary (Sangli)</span>
+                                </div>
+                                <div class="indicator-dot"></div>
+                            </div>
+
+                            <div class="legend-item active" data-layer="solapur_taluka" onclick="toggleMapLayer('solapur_taluka', this)">
+                                <div class="legend-left">
+                                    <span class="symbol symbol-line" style="background: rgba(53,121,177,1.0);"></span>
+                                    <span class="legend-label">Taluka Boundary (Solapur)</span>
+                                </div>
+                                <div class="indicator-dot"></div>
+                            </div>
+
+                            <div class="legend-item active" data-layer="sangli_village" onclick="toggleMapLayer('sangli_village', this)">
+                                <div class="legend-left">
+                                    <span class="symbol symbol-line" style="background: rgba(121,14,3,1.0);"></span>
+                                    <span class="legend-label">Village Boundary (Sangli)</span>
+                                </div>
+                                <div class="indicator-dot"></div>
+                            </div>
+
+                            <div class="legend-item active" data-layer="solapur_village" onclick="toggleMapLayer('solapur_village', this)">
+                                <div class="legend-left">
+                                    <span class="symbol symbol-line" style="background: rgba(121,14,3,0.6);"></span>
+                                    <span class="legend-label">Village Boundary (Solapur)</span>
+                                </div>
+                                <div class="indicator-dot"></div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+
+                <div class="sidebar-footer">
+                    Punyashlok Ahilyadevi Holkar Solapur University<br>
+                    Department of Earth Sciences &copy; 2026
+                </div>
+            </div>
+
+            <div class="sidebar-overlay" onclick="toggleSidebar()"></div>
+
+            <div class="map-container">
+                <div id="map"></div>
+            </div>
+        </div>
+
+        <script src="js/qgis2web_expressions.js"></script>
+        <script src="js/leaflet.js"></script>
+        <script src="js/L.Control.Layers.Tree.min.js"></script>
+        <script src="js/leaflet.rotatedMarker.js"></script>
+        <script src="js/leaflet.pattern.js"></script>
+        <script src="js/leaflet-hash.js"></script>
+        <script src="js/Autolinker.min.js"></script>
+        <script src="js/rbush.min.js"></script>
+        <script src="js/labelgun.min.js"></script>
+        <script src="js/labels.js"></script>
+        <script src="js/leaflet.photon.js"></script>
+        
+        <script src="data/Sangali_village_boundary_2.js"></script>
+        <script src="data/Solapur_village_boundary_3.js"></script>
+        <script src="data/Sangli_taluka_boundary_4.js"></script>
+        <script src="data/Solapur_taluka_boundary_5.js"></script>
+        <script src="data/Sangali_district_boundari_6.js"></script>
+        <script src="data/Solapur_district_boundari_7.js"></script>
+        <script src="data/gps_points_8.js"></script>
+
+        <script>
+        var map = L.map('map', {
+            zoomControl:false, maxZoom:28, minZoom:1
+        }).fitBounds([[16.974818981021276,74.51541717683808],[17.457599199536457,75.45625926668048]]);
+        
+        var hash = new L.Hash(map);
+        var autolinker = new Autolinker({truncate: {length: 30, location: 'smart'}});
+        
+        function removeEmptyRowsFromPopupContent(content, feature) {
+             var tempDiv = document.createElement('div');
+             tempDiv.innerHTML = content;
+             var rows = tempDiv.querySelectorAll('tr');
+             for (var i = 0; i < rows.length; i++) {
+                 var td = rows[i].querySelector('td.visible-with-data');
+                 var key = td ? td.id : '';
+                 if (td && td.classList.contains('visible-with-data') && feature.properties[key] == null) {
+                     rows[i].parentNode.removeChild(rows[i]);
+                 }
+             }
+             return tempDiv.innerHTML;
         }
 
         function addClassToPopupIfMedia(content, popup) {
@@ -601,15 +503,14 @@
                 var src = imgTd.getAttribute('src');
                 if (/\.(jpg|jpeg|png|gif|bmp|webp|avif)$/i.test(src)) {
                     popup._contentNode.classList.add('media');
-                    setTimeout(function () { popup.update(); }, 10);
+                    setTimeout(function() { popup.update(); }, 10);
                 }
             }
         }
 
-        // Reposition standard zoom adjustments engine panel below title header anchors
         L.control.zoom({ position: 'topleft' }).addTo(map);
 
-        // Vector Style Definition Dictionaries
+        // Styling Config Templates For Layers
         var baseStyles = {
             'sangli_village': { color: 'rgba(121,14,3,1.0)', weight: 1.0, fill: false },
             'solapur_village': { color: 'rgba(121,14,3,0.6)', weight: 1.0, fill: false },
@@ -619,7 +520,7 @@
             'solapur_district': { color: 'rgba(255,127,0,1.0)', weight: 3.0, fill: false }
         };
 
-        // Base Map Tile Layers Instantiation
+        // Basemap Instantiations
         map.createPane('pane_GoogleSatellite_0');
         map.getPane('pane_GoogleSatellite_0').style.zIndex = 400;
         var layer_GoogleSatellite_0 = L.tileLayer('https://mt1.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', {
@@ -631,105 +532,65 @@
         var layer_OpenStreetMap_1 = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
             pane: 'pane_OpenStreetMap_1', opacity: 1.0, minZoom: 1, maxZoom: 28
         });
-
-        // Render base map view configuration on canvas initialization
+        
         map.addLayer(layer_OpenStreetMap_1);
 
-        // 2. Sangali Village Boundary Layer
-        function pop_Sangali_village_boundary_2(feature, layer) {
-            var popupContent = '<table><tr><th scope="row">Vill_name</th><td>' + (feature.properties['Vill_name'] !== null ? autolinker.link(String(feature.properties['Vill_name'])) : '') + '</td></tr></table>';
-            layer.bindPopup(removeEmptyRowsFromPopupContent(popupContent, feature), { maxHeight: 400 });
-        }
+        // Init GeoJSON Map Layer Bindings
         map.createPane('pane_Sangali_village_boundary_2');
         map.getPane('pane_Sangali_village_boundary_2').style.zIndex = 402;
         var layer_Sangali_village_boundary_2 = new L.geoJson(json_Sangali_village_boundary_2, {
             pane: 'pane_Sangali_village_boundary_2',
-            onEachFeature: pop_Sangali_village_boundary_2,
             style: baseStyles['sangli_village']
         });
         map.addLayer(layer_Sangali_village_boundary_2);
 
-        // 3. Solapur Village Boundary Layer
-        function pop_Solapur_village_boundary_3(feature, layer) {
-            var popupContent = '<table><tr><th scope="row">Vill_name</th><td>' + (feature.properties['Vill_name'] !== null ? autolinker.link(String(feature.properties['Vill_name'])) : '') + '</td></tr></table>';
-            layer.bindPopup(removeEmptyRowsFromPopupContent(popupContent, feature), { maxHeight: 400 });
-        }
         map.createPane('pane_Solapur_village_boundary_3');
         map.getPane('pane_Solapur_village_boundary_3').style.zIndex = 403;
         var layer_Solapur_village_boundary_3 = new L.geoJson(json_Solapur_village_boundary_3, {
             pane: 'pane_Solapur_village_boundary_3',
-            onEachFeature: pop_Solapur_village_boundary_3,
             style: baseStyles['solapur_village']
         });
         map.addLayer(layer_Solapur_village_boundary_3);
 
-        // 4. Sangli Taluka Boundary Layer
-        function pop_Sangli_taluka_boundary_4(feature, layer) {
-            var popupContent = '<table><tr><th scope="row">Sub_dist</th><td>' + (feature.properties['Sub_dist'] !== null ? autolinker.link(String(feature.properties['Sub_dist'])) : '') + '</td></tr></table>';
-            layer.bindPopup(removeEmptyRowsFromPopupContent(popupContent, feature), { maxHeight: 400 });
-        }
         map.createPane('pane_Sangli_taluka_boundary_4');
         map.getPane('pane_Sangli_taluka_boundary_4').style.zIndex = 404;
         var layer_Sangli_taluka_boundary_4 = new L.geoJson(json_Sangli_taluka_boundary_4, {
             pane: 'pane_Sangli_taluka_boundary_4',
-            onEachFeature: pop_Sangli_taluka_boundary_4,
             style: baseStyles['sangli_taluka']
         });
         map.addLayer(layer_Sangli_taluka_boundary_4);
 
-        // 5. Solapur Taluka Boundary Layer
-        function pop_Solapur_taluka_boundary_5(feature, layer) {
-            var popupContent = '<table><tr><th scope="row">Sub_dist</th><td>' + (feature.properties['Sub_dist'] !== null ? autolinker.link(String(feature.properties['Sub_dist'])) : '') + '</td></tr></table>';
-            layer.bindPopup(removeEmptyRowsFromPopupContent(popupContent, feature), { maxHeight: 400 });
-        }
         map.createPane('pane_Solapur_taluka_boundary_5');
         map.getPane('pane_Solapur_taluka_boundary_5').style.zIndex = 405;
         var layer_Solapur_taluka_boundary_5 = new L.geoJson(json_Solapur_taluka_boundary_5, {
             pane: 'pane_Solapur_taluka_boundary_5',
-            onEachFeature: pop_Solapur_taluka_boundary_5,
             style: baseStyles['solapur_taluka']
         });
         map.addLayer(layer_Solapur_taluka_boundary_5);
 
-        // 6. Sangli District Boundary Layer
-        function pop_Sangali_district_boundari_6(feature, layer) {
-            var popupContent = '<table><tr><th scope="row">DISTRICT</th><td>' + (feature.properties['DISTRICT'] !== null ? autolinker.link(String(feature.properties['DISTRICT'])) : '') + '</td></tr></table>';
-            layer.bindPopup(removeEmptyRowsFromPopupContent(popupContent, feature), { maxHeight: 400 });
-        }
         map.createPane('pane_Sangali_district_boundari_6');
         map.getPane('pane_Sangali_district_boundari_6').style.zIndex = 406;
         var layer_Sangali_district_boundari_6 = new L.geoJson(json_Sangali_district_boundari_6, {
             pane: 'pane_Sangali_district_boundari_6',
-            onEachFeature: pop_Sangali_district_boundari_6,
             style: baseStyles['sangli_district']
         });
         map.addLayer(layer_Sangali_district_boundari_6);
 
-        // 7. Solapur District Boundary Layer
-        function pop_Solapur_district_boundari_7(feature, layer) {
-            var popupContent = '<table><tr><th scope="row">DISTRICT</th><td>' + (feature.properties['DISTRICT'] !== null ? autolinker.link(String(feature.properties['DISTRICT'])) : '') + '</td></tr></table>';
-            layer.bindPopup(removeEmptyRowsFromPopupContent(popupContent, feature), { maxHeight: 400 });
-        }
         map.createPane('pane_Solapur_district_boundari_7');
         map.getPane('pane_Solapur_district_boundari_7').style.zIndex = 407;
         var layer_Solapur_district_boundari_7 = new L.geoJson(json_Solapur_district_boundari_7, {
             pane: 'pane_Solapur_district_boundari_7',
-            onEachFeature: pop_Solapur_district_boundari_7,
             style: baseStyles['solapur_district']
         });
         map.addLayer(layer_Solapur_district_boundari_7);
 
-        // 8. GPS Points Layer
+        // GPS Points Control Pane Layer
         function pop_gps_points_8(feature, layer) {
             var popupContent = '<table>\
                     <tr><th scope="row">Location</th><td>' + (feature.properties['Location'] !== null ? autolinker.link(String(feature.properties['Location'])) : '') + '</td></tr>\
-                    <tr><th scope="row">Longitu</th><td>' + (feature.properties['Longitu'] !== null ? autolinker.link(String(feature.properties['Longitu'])) : '') + '</td></tr>\
-                    <tr><th scope="row">Latitud</th><td>' + (feature.properties['Latitud'] !== null ? autolinker.link(String(feature.properties['Latitud'])) : '') + '</td></tr>\
-                    <tr><td colspan="2">' + (feature.properties['Images'] !== null ? '<img src="images/' + String(feature.properties['Images']).replace(/[\\/:]/g, '_').trim() + '" style="max-width:200px; border-radius:6px; margin-top:8px;">' : '') + '</td></tr>\
+                    <tr><td colspan="2">' + (feature.properties['Images'] !== null ? '<img src="images/' + String(feature.properties['Images']).replace(/[\\/:]/g, '_').trim() + '" style="max-width:200px;border-radius:6px;">' : '') + '</td></tr>\
                 </table>';
-            var content = removeEmptyRowsFromPopupContent(popupContent, feature);
-            layer.on('popupopen', function (e) { addClassToPopupIfMedia(content, e.popup); });
-            layer.bindPopup(content, { maxHeight: 400 });
+            layer.bindPopup(removeEmptyRowsFromPopupContent(popupContent, feature), { maxHeight: 400 });
         }
         map.createPane('pane_gps_points_8');
         map.getPane('pane_gps_points_8').style.zIndex = 408;
@@ -737,12 +598,12 @@
             pane: 'pane_gps_points_8',
             onEachFeature: pop_gps_points_8,
             pointToLayer: function (feature, latlng) {
-                return L.circleMarker(latlng, { radius: 5.0, opacity: 1, color: 'rgba(35,35,35,1.0)', weight: 1, fill: true, fillColor: 'rgba(225,0,25,1.0)' });
+                return L.circleMarker(latlng, { radius: 5.0, opacity: 1, color: '#232323', weight: 1, fill: true, fillColor: '#e10019' });
             },
         });
         map.addLayer(layer_gps_points_8);
 
-        // Active Reference Map Lookup Dictionary
+        // Core UI References Lookups Map Dictionary
         var layerMap = {
             'gps_points': layer_gps_points_8,
             'sangli_district': layer_Sangali_district_boundari_6,
@@ -753,62 +614,40 @@
             'solapur_village': layer_Solapur_village_boundary_3
         };
 
-        // Layer Activation & Red Color Highlighting Management Module
+        // Reactive Map Overlay Layers Controls
         function toggleMapLayer(layerKey, element) {
             var selectedLayer = layerMap[layerKey];
-
             if (map.hasLayer(selectedLayer)) {
-                // If toggled off, remove from map and remove active styles
                 map.removeLayer(selectedLayer);
                 element.classList.remove('active');
             } else {
-                // If toggled on, add to map and highlight active layers in bright red
                 map.addLayer(selectedLayer);
                 element.classList.add('active');
-
-                // If it is a vector polygon shape/line boundary, apply a sharp red focus outline color
-                if (layerKey !== 'gps_points' && typeof selectedLayer.setStyle === 'function') {
-                    selectedLayer.setStyle({
-                        color: 'var(--highlight-red)',
-                        weight: layerKey.includes('district') ? 4.0 : layerKey.includes('taluka') ? 3.0 : 2.0
-                    });
-                }
             }
         }
 
-        // Re-enforce red tracking color configuration rules if base tile swaps occur
-        function enforceLayerHighlights() {
-            Object.keys(layerMap).forEach(function (key) {
-                var layer = layerMap[key];
-                if (map.hasLayer(layer) && key !== 'gps_points') {
-                    layer.setStyle({ color: 'var(--highlight-red)' });
-                }
-            });
-        }
-
-        // Basemap Switch Engine Controller Logic
+        // Basemap Engine Controller Method Inside Left Sidebar
         function switchBasemap(type) {
-            document.getElementById('float-satellite').classList.remove('active');
-            document.getElementById('float-osm').classList.remove('active');
-
+            document.getElementById('sb-satellite').classList.remove('active');
+            document.getElementById('sb-osm').classList.remove('active');
+            
             if (type === 'satellite') {
                 if (map.hasLayer(layer_OpenStreetMap_1)) map.removeLayer(layer_OpenStreetMap_1);
                 if (!map.hasLayer(layer_GoogleSatellite_0)) map.addLayer(layer_GoogleSatellite_0);
-                document.getElementById('float-satellite').classList.add('active');
+                document.getElementById('sb-satellite').classList.add('active');
             } else {
                 if (map.hasLayer(layer_GoogleSatellite_0)) map.removeLayer(layer_GoogleSatellite_0);
                 if (!map.hasLayer(layer_OpenStreetMap_1)) map.addLayer(layer_OpenStreetMap_1);
-                document.getElementById('float-osm').classList.add('active');
+                document.getElementById('sb-osm').classList.add('active');
             }
-            enforceLayerHighlights();
         }
 
-        // Mobile Layout Toggle Drawer Method
+        // Sidebar Display Toggle Configuration Method
         function toggleSidebar() {
-            var sidebar = document.getElementById('appSidebar');
-            sidebar.classList.toggle('open');
+            document.getElementById('appSidebar').classList.toggle('open');
         }
-    </script>
-</body>
-
+        </script>        
+    </body>
 </html>
+
+```
