@@ -3,7 +3,7 @@
 ## 📌 Project Overview
 This project is an interactive Web GIS Dashboard developed as part of my 15-day **On-the-Job Training (OJT)** and field survey experience. The primary objective of this dashboard is to effectively visualize, manage, and analyze spatial data collected directly from the field on a web platform.
 
-* **Live Web Map Link:** [Click Here to View the Dashboard]([https://miviiicky.github.io/GeoTrack-On-the-Job-Field-Survey-Dashboard/](https://onkar-geoleneinfo.github.io/GeoTrack-On-the-Job-Field-Survey-Dashboard/))
+* **Live Web Map Link:** [Click Here to View the Dashboard](https://onkar-geoleneinfo.github.io/GeoTrack-On-the-Job-Field-Survey-Dashboard/)
 
 ---
 
